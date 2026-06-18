@@ -9,7 +9,7 @@ Lyric Mask overlays song lyrics as a text mask, revealing a portrait through the
 
 # Dev-Log
 **Full AI Overhaul**
-- Used Claude Code Sonnet 4.6 to generate the code
+- Used Claude Sonnet 4.6 to generate the code
 - I had features I planned to add but didn't know how to do:
   - Downloadable image (rather than just a webpage)
   - Live preview

@@ -1,5 +1,5 @@
-# Lyric-Mask
-Lyric Mask overlays song lyrics as a text mask, revealing a portrait through the letters themselves. The image remains intact behind the text, creating a striking blend of typography and photography where the artist appears to emerge from their own words.
+# Text Through Image
+Text Through Image overlays song lyrics as a text mask, revealing a portrait through the letters themselves. The image remains intact behind the text, creating a striking blend of typography and photography where the artist appears to emerge from their own words.
 
 # How to Use
 1. Upload Your image

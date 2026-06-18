@@ -6,7 +6,7 @@
 <title>Text Through Image</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=Archivo+Black&family=Anton&family=Oswald:wght@700&family=Playfair+Display:wght@900&family=Abril+Fatface&family=Big+Shoulders:wght@900&family=Unbounded:wght@800&family=Space+Mono:wght@700&family=Caveat:wght@700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#0a0a0a;
@@ -116,9 +116,19 @@
     padding:12px;
     line-height:1.4;
   }
-  textarea:focus-visible, input:focus-visible, button:focus-visible, .dropzone:focus-visible{
+  textarea:focus-visible, input:focus-visible, button:focus-visible, select:focus-visible, .dropzone:focus-visible{
     outline:2px solid var(--accent);
     outline-offset:2px;
+  }
+  select{
+    background:#0d0d0d;
+    border:1px solid var(--panel-border);
+    border-radius:10px;
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    padding:10px 12px;
+    cursor:pointer;
   }
   input[type="range"]{
     width:100%;
@@ -226,6 +236,22 @@
       </div>
 
       <div class="field">
+        <label for="fontSelect">Font</label>
+        <select id="fontSelect">
+          <option value="Space Grotesk" data-weight="700" selected>Space Grotesk — geometric sans</option>
+          <option value="Archivo Black" data-weight="400">Archivo Black — heavy sans</option>
+          <option value="Anton" data-weight="400">Anton — condensed black</option>
+          <option value="Oswald" data-weight="700">Oswald — condensed bold</option>
+          <option value="Playfair Display" data-weight="900">Playfair Display — serif black</option>
+          <option value="Abril Fatface" data-weight="400">Abril Fatface — display serif</option>
+          <option value="Big Shoulders" data-weight="900">Big Shoulders — industrial</option>
+          <option value="Unbounded" data-weight="800">Unbounded — rounded geometric</option>
+          <option value="Space Mono" data-weight="700">Space Mono — monospace</option>
+          <option value="Caveat" data-weight="700">Caveat — handwritten</option>
+        </select>
+      </div>
+
+      <div class="field">
         <div class="field-row">
           <label for="sizeInput">Text size</label>
           <span class="size-value" id="sizeValue">90px</span>
@@ -254,6 +280,7 @@
   const imageInput = document.getElementById('imageInput');
   const fileName = document.getElementById('fileName');
   const textInput = document.getElementById('textInput');
+  const fontSelect = document.getElementById('fontSelect');
   const sizeInput = document.getElementById('sizeInput');
   const sizeValue = document.getElementById('sizeValue');
   const downloadBtn = document.getElementById('downloadBtn');
@@ -341,7 +368,9 @@
     // 2. Punch text-shaped holes out of the black layer
     const fontSize = parseInt(sizeInput.value, 10);
     const lineHeight = Math.round(fontSize * 0.92);
-    ctx.font = `900 ${fontSize}px "Space Grotesk", sans-serif`;
+    const fontFamily = fontSelect.value;
+    const fontWeight = fontSelect.selectedOptions[0]?.dataset.weight || '700';
+    ctx.font = `${fontWeight} ${fontSize}px "${fontFamily}", sans-serif`;
     ctx.textBaseline = 'top';
 
     const maxWidth = w * 0.94;
@@ -394,7 +423,18 @@
     }
   });
 
+  async function loadSelectedFont(){
+    const family = fontSelect.value;
+    const weight = fontSelect.selectedOptions[0]?.dataset.weight || '700';
+    try {
+      await document.fonts.load(`${weight} 32px "${family}"`);
+    } catch (e) {}
+  }
+
   textInput.addEventListener('input', scheduleRender);
+  fontSelect.addEventListener('change', () => {
+    loadSelectedFont().then(scheduleRender);
+  });
   sizeInput.addEventListener('input', () => {
     sizeValue.textContent = sizeInput.value + 'px';
     scheduleRender();
@@ -413,7 +453,7 @@
     }, 'image/png');
   });
 
-  document.fonts.ready.then(scheduleRender).catch(() => {});
+  loadSelectedFont().then(scheduleRender);
 </script>
 </body>
 </html>

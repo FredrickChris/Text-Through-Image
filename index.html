@@ -257,6 +257,7 @@
           <option value="left" selected>Left</option>
           <option value="center">Center</option>
           <option value="right">Right</option>
+          <option value="justify">Justify</option>
         </select>
       </div>
 
@@ -339,14 +340,17 @@
     const words = text.split(/\s+/).filter(Boolean);
     if (!words.length) return [];
     const lines = [];
-    let current = words[0];
+    let current = [words[0]];
+    let currentText = words[0];
     for (let i = 1; i < words.length; i++){
-      const test = current + ' ' + words[i];
+      const test = currentText + ' ' + words[i];
       if (measureCtx.measureText(test).width <= maxWidth){
-        current = test;
+        current.push(words[i]);
+        currentText = test;
       } else {
         lines.push(current);
-        current = words[i];
+        current = [words[i]];
+        currentText = words[i];
       }
     }
     lines.push(current);
@@ -363,6 +367,30 @@
       i++;
     }
     return lines;
+  }
+
+  function drawLine(drawCtx, words, x0, width, y, align){
+    if (align === 'justify' && words.length > 1){
+      const wordWidths = words.map(word => drawCtx.measureText(word).width);
+      const totalWordWidth = wordWidths.reduce((a, b) => a + b, 0);
+      const gapWidth = (width - totalWordWidth) / (words.length - 1);
+      drawCtx.textAlign = 'left';
+      let x = x0;
+      for (let i = 0; i < words.length; i++){
+        drawCtx.fillText(words[i], x, y);
+        x += wordWidths[i] + gapWidth;
+      }
+      return;
+    }
+
+    // Left / Center / Right (also the fallback for a single-word "justify" line)
+    const effectiveAlign = align === 'justify' ? 'left' : align;
+    const text = words.join(' ');
+    drawCtx.textAlign = effectiveAlign;
+    let x = x0;
+    if (effectiveAlign === 'center') x = x0 + width / 2;
+    else if (effectiveAlign === 'right') x = x0 + width;
+    drawCtx.fillText(text, x, y);
   }
 
   function render(){
@@ -383,8 +411,8 @@
     ctx.font = `${fontWeight} ${fontSize}px "${fontFamily}", sans-serif`;
     ctx.textBaseline = 'top';
 
-    const maxWidth = w * 0.94;
-    const xPad = w * 0.03;
+    const maxWidth = w;
+    const xPad = 0;
     const maxLines = Math.ceil(h / lineHeight) + 1;
     const rawText = (textInput.value || '').trim() || 'Your text here';
     const lines = buildRepeatedLines(ctx, rawText, maxWidth, maxLines);
@@ -393,15 +421,10 @@
     ctx.fillStyle = '#fff';
 
     const align = alignSelect.value;
-    ctx.textAlign = align;
-    let xPos = xPad;
-    if (align === 'center') xPos = w / 2;
-    else if (align === 'right') xPos = w - xPad;
-
     let y = 0;
-    for (const line of lines){
+    for (const words of lines){
       if (y > h) break;
-      ctx.fillText(line, xPos, y);
+      drawLine(ctx, words, xPad, maxWidth, y, align);
       y += lineHeight;
     }
 
